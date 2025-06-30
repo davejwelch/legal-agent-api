@@ -1,11 +1,13 @@
+import requests
 from flask import Flask, request, jsonify
 import openai
 import os
 
 app = Flask(__name__)
 
-# Load your OpenAI API key from the environment
+# Load your API keys
 openai.api_key = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Define the legal agents
 AGENTS = {
@@ -23,14 +25,17 @@ AGENTS = {
     }
 }
 
+# Home route - simple check
 @app.route('/')
 def home():
     return "Legal Agent API is running!"
 
+# List available agents
 @app.route('/agents', methods=['GET'])
 def list_agents():
     return jsonify({key: val["name"] for key, val in AGENTS.items()})
 
+# Run an OpenAI agent
 @app.route('/run-agent', methods=['POST'])
 def run_agent():
     data = request.json
@@ -57,5 +62,37 @@ def run_agent():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Query Gemini API
+@app.route('/gemini', methods=['POST'])
+def query_gemini():
+    data = request.json
+    prompt = data.get("prompt")
+
+    if not prompt:
+        return jsonify({"error": "Missing prompt"}), 400
+
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    params = {"key": GEMINI_API_KEY}
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
+    }
+
+    response = requests.post(url, params=params, headers=headers, json=payload)
+
+    if response.ok:
+        reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        return jsonify({"response": reply})
+    else:
+        return jsonify({"error": response.text}), response.status_code
+
+
+# Run the app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
