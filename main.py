@@ -2,6 +2,7 @@ import requests
 from flask import Flask, request, jsonify
 import openai
 import os
+from docx import Document
 
 app = Flask(__name__)
 
@@ -94,9 +95,8 @@ def query_gemini():
 
 
 # Run the app
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
-    @app.route('/gemini-upload', methods=['POST'])
+
+@app.route('/gemini-upload', methods=['POST'])
 def gemini_with_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
@@ -155,3 +155,5 @@ def extract_text_from_pdf(file):
 def extract_text_from_docx(file):
     document = Document(io.BytesIO(file.read()))
     return "\n".join([para.text for para in document.paragraphs])
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080)
