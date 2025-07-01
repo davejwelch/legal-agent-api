@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 import openai
 import os
 from docx import Document
+import pdfplumber
+import io
 
 app = Flask(__name__)
 
