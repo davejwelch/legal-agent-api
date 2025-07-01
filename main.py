@@ -71,7 +71,7 @@ def query_gemini():
     if not prompt:
         return jsonify({"error": "Missing prompt"}), 400
 
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+    url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent"
     params = {"key": GEMINI_API_KEY}
     headers = {"Content-Type": "application/json"}
     payload = {
