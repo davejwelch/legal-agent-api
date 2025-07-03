@@ -2,3 +2,5 @@ flask
 openai
 requests
 gunicorn
+pdfplumber
+python-docx
